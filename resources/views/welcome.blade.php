@@ -13,7 +13,7 @@
 <body>
     <div class="card">
         <h1>CAO HUY LỘC - 241CTT015</h1>
-        <p>Đây là bài code hoàn chỉnh đầu tiên trên Laravel của em.</p>
+        <p>Đây là bài code đầu tiên trên Laravel .</p>
         <p>Trạng thái: <b>Đã cài đặt thành công!</b></p>
     </div>
 </body>
