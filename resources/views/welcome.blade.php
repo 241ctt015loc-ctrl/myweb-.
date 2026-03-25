@@ -1,19 +1,23 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Bài tập Laravel của Lộc</title>
+    <title>Đệ Nhất Truyện</title>
     <style>
-        body { font-family: sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; }
-        p { color: #555; }
+        body { font-family: sans-serif; padding: 20px; }
+        .story-card { border: 1px solid #ccc; padding: 15px; width: 300px; border-radius: 8px; }
+        h1 { color: #333; }
     </style>
 </head>
 <body>
-    <div class="card">
-    
-        <p>Đây là bài code đầu tiên trên Laravel .</p>
-        <p>Trạng thái: <b>Đã cài đặt thành công!</b></p>
-    </div>
+    <h1>Danh sách truyện mới nhất</h1>
+
+    @foreach($stories as $story)
+        <div class="story-card">
+            <h2>{{ $story->title }}</h2>
+            <p>Giá: {{ number_format($story->price) }} VNĐ</p>
+            <p>Tóm tắt: {{ $story->summary }}</p>
+            <a href="#">Đọc ngay</a>
+        </div>
+    @endforeach
 </body>
 </html>
