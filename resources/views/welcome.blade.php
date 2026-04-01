@@ -55,15 +55,15 @@
             </form>
         </div>
     </div>
-<section class="hero-banner">
-    <div class="banner-overlay"></div> 
-    
-    <div class="banner-content">
-        <h2>Thế Giới Truyện Trong Tầm Tay</h2>
-        <p>Khám phá hàng ngàn tựa truyện hấp dẫn nhất mọi thời đại</p>
-        <a href="#danh-sach" class="btn-banner"><i class="fas fa-shopping-bag"></i> Mua Ngay</a>
-    </div>
-</section>
+
+    <section class="hero-banner">
+        <div class="banner-overlay"></div> 
+        <div class="banner-content">
+            <h2>Thế Giới Truyện Trong Tầm Tay</h2>
+            <p>Khám phá hàng ngàn tựa truyện hấp dẫn nhất mọi thời đại</p>
+            <a href="#danh-sach" class="btn-banner"><i class="fas fa-shopping-bag"></i> Mua Ngay</a>
+        </div>
+    </section>
 
     <main class="content-wrapper" id="danh-sach">
         <div class="section-header">
@@ -82,7 +82,8 @@
                         <div class="card-info">
                             <h2>{{ $story->TenTruyen }}</h2>
                             <div>
-                                <span class="price"><i class="fas fa-tag"></i> {{ number_format($story->Gia ?? 50000) }}đ</span>
+                                {{-- Đã sửa $item thành $story để lấy đúng giá từ database --}}
+                                <span class="price">{{ number_format($story->GiaBan, 0, ',', '.') }}đ</span>
                             </div>
                         </div>
                     </a>
@@ -113,17 +114,17 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-@if(session('order_success'))
-<script>
-    Swal.fire({
-        title: '🎉 Chúc mừng!',
-        text: '{{ session('order_success') }}',
-        icon: 'success',
-        confirmButtonText: 'Tuyệt vời',
-        confirmButtonColor: '#ff4757',
-        backdrop: `rgba(0,0,123,0.4) url("https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJndnBqZ3BqZ3BqZ3BqZ3BqZ3BqZ3BqZ3BqZ3BqZ3BqZ3BqZ3BqJmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/l0MYt5jPR6QX5pnqM/giphy.gif") left top no-repeat`
-    })
-</script>
-@endif
+    @if(session('order_success'))
+    <script>
+        Swal.fire({
+            title: '🎉 Chúc mừng!',
+            text: '{{ session('order_success') }}',
+            icon: 'success',
+            confirmButtonText: 'Tuyệt vời',
+            confirmButtonColor: '#ff4757',
+            backdrop: `rgba(0,0,123,0.4) url("https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJndnBqZ3BqZ3BqZ3BqZ3BqZ3BqZ3BqZ3BqZ3BqZ3BqZ3BqZ3BqJmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/l0MYt5jPR6QX5pnqM/giphy.gif") left top no-repeat`
+        })
+    </script>
+    @endif
 </body>
 </html>
