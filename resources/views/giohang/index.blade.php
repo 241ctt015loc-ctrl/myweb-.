@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Giỏ Hàng - Đệ Nhất Truyện</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body { background-color: #f4f6f9; padding: 50px 0; }
         .cart-container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
@@ -57,13 +58,13 @@
                         <th>Giá</th>
                         <th>Số lượng</th>
                         <th>Thành tiền</th>
-                    </tr>
+                        <th class="text-center">Hành động</th> </tr>
                 </thead>
                 <tbody>
                     @php $total = 0; @endphp
                     
                     {{-- Kiểm tra xem có hàng trong Session không --}}
-                    @if(session('gio_hang'))
+                    @if(session('gio_hang') && count(session('gio_hang')) > 0)
                         @foreach(session('gio_hang') as $id => $details)
                             {{-- Ép kiểu giá bán thành số trước khi tính toán để PHP không bị lú --}}
                             @php $total += (float)$details['gia_ban'] * $details['so_luong']; @endphp
@@ -79,11 +80,21 @@
                                 
                                 {{-- Ép kiểu hiển thị Thành tiền --}}
                                 <td class="align-middle text-danger font-weight-bold">{{ number_format((float)$details['gia_ban'] * $details['so_luong'], 0, ',', '.') }} đ</td>
+                                
+                                {{-- Nút xóa --}}
+                                <td class="align-middle text-center">
+                                    <a href="{{ route('cart.remove', $id) }}" class="btn btn-sm btn-danger" style="border-radius: 5px;">
+                                        <i class="fas fa-trash"></i> Xóa
+                                    </a>
+                                </td>
                             </tr>
                         @endforeach
                     @else
                         <tr>
-                            <td colspan="5" class="text-center py-4">Giỏ hàng của bạn đang trống! Hãy quay lại chọn truyện nhé.</td>
+                            <td colspan="6" class="text-center py-4 text-muted">
+                                <h4>Giỏ hàng của bạn đang trống!</h4>
+                                <p>Hãy quay lại trang chủ để chọn thêm truyện nhé.</p>
+                            </td>
                         </tr>
                     @endif
                 </tbody>
@@ -105,5 +116,40 @@
 
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+@if(session('added_to_cart'))
+<script>
+    const Toast = Swal.mixin({
+      toast: true,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true,
+    })
+
+    Toast.fire({
+      icon: 'success',
+      title: '{{ session('added_to_cart') }}'
+    })
+</script>
+@endif
+
+@if(session('removed_from_cart'))
+<script>
+    const ToastRemove = Swal.mixin({
+      toast: true,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true,
+    })
+
+    ToastRemove.fire({
+      icon: 'warning',
+      title: '{{ session('removed_from_cart') }}'
+    })
+</script>
+@endif
 </body>
 </html>

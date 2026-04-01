@@ -7,70 +7,138 @@ use App\Models\Truyen;
 
 class GioHangController extends Controller
 {
-    // 1. Hàm hiển thị trang giỏ hàng
-    public function index()
+    /**
+     * 1. Hàm hiển thị TRANG CHỦ (Trang danh sách truyện)
+     */
+    public function index(Request $request)
+    {
+        $query = $request->input('query');
+
+        if ($query) {
+            $stories = Truyen::where('TenTruyen', 'LIKE', "%{$query}%")->get();
+        } else {
+            $stories = Truyen::all();
+        }
+
+        return view('welcome', compact('stories'));
+    }
+
+    /**
+     * 2. Hàm xử lý khi nhấn nút "Thêm vào giỏ"
+     */
+    public function themVaoGio(Request $request, $id)
+    {
+        $truyen = Truyen::find($id);
+
+        if (!$truyen) {
+            return redirect('/')->with('error', 'Truyện không tồn tại!');
+        }
+        
+        $soLuongMua = $request->input('so_luong', 1);
+        $gioHang = session()->get('gio_hang', []);
+
+        if(isset($gioHang[$id])) {
+            $gioHang[$id]['so_luong'] += $soLuongMua;
+        } else {
+            $gioHang[$id] = [
+                "ten_truyen" => $truyen->TenTruyen, 
+                "so_luong"   => $soLuongMua,
+                "gia_ban"    => $truyen->GiaBan,   
+                "hinh_anh"   => $truyen->HinhAnh   
+            ];
+        }
+
+        session()->put('gio_hang', $gioHang);
+
+        return redirect()->action([GioHangController::class, 'xemGioHang'])
+                         ->with('added_to_cart', 'Đã thêm vào giỏ hàng thành công!');
+    }
+
+    /**
+     * 3. Hàm xử lý TÌM KIẾM (Cho route /search)
+     */
+    public function search(Request $request)
+    {
+        $query = $request->input('query');
+        $stories = Truyen::where('TenTruyen', 'LIKE', "%{$query}%")->get();
+
+        return view('welcome', compact('stories'));
+    }
+
+    /**
+     * 4. Hàm hiển thị trang GIỎ HÀNG
+     */
+    public function xemGioHang()
     {
         return view('giohang.index');
     }
 
-    // 2. Hàm xử lý khi nhấn nút "Thêm vào giỏ"
-    public function themVaoGio(Request $request, $id)
+    /**
+     * TÍNH NĂNG MỚI: XÓA 1 TRUYỆN KHỎI GIỎ HÀNG
+     */
+    public function xoaKhoiGio($id)
     {
-        // Tìm xem cuốn truyện đó có tồn tại không
-        $truyen = Truyen::find($id);
-
-        if (!$truyen) {
-            return redirect()->back()->with('error', 'Truyện không tồn tại!');
-        }
-
-        // Lấy giỏ hàng từ Session (nếu chưa có thì là mảng rỗng)
         $gioHang = session()->get('gio_hang', []);
 
-        // Nếu truyện đã có trong giỏ, tăng số lượng lên 1
+        // Nếu tồn tại truyện này trong giỏ thì tiến hành xóa
         if(isset($gioHang[$id])) {
-            $gioHang[$id]['so_luong']++;
-        } else {
-            // Thêm mới với đúng tên cột trong Database (Chữ Hoa)
-            $gioHang[$id] = [
-                "ten_truyen" => $truyen->TenTruyen, 
-                "so_luong" => 1,
-                "gia_ban" => (float)$truyen->GiaBan, 
-                "hinh_anh" => $truyen->HinhAnh
-            ];
+            unset($gioHang[$id]); // Xóa phần tử khỏi mảng
+            session()->put('gio_hang', $gioHang); // Cập nhật lại session
         }
 
-        // Lưu lại vào bộ nhớ Session
-        session()->put('gio_hang', $gioHang);
-
-        // Gửi thông báo ngắn gọn để tránh lỗi văng dấu nháy làm hỏng Script
-        return redirect()->back()->with('swal_success', 'Đã thêm truyện vào giỏ hàng thành công!');
+        // Quay lại trang giỏ hàng và báo thành công
+        return redirect()->back()->with('removed_from_cart', 'Đã xóa truyện khỏi giỏ hàng!');
     }
-    // Hàm hiển thị trang Checkout
+
+    /**
+     * 5. Hàm hiển thị trang Thanh toán (Checkout)
+     */
     public function thanhToan()
     {
         $gioHang = session()->get('gio_hang', []);
         
-        // Nếu giỏ hàng trống mà cố tình vào trang thanh toán thì đuổi về trang chủ
         if(empty($gioHang)) {
             return redirect('/')->with('error', 'Giỏ hàng của bạn đang trống!');
         }
 
         return view('giohang.checkout', compact('gioHang'));
     }
+
+    /**
+     * 6. Xử lý đặt hàng thành công
+     */
     public function xuLyThanhToan(Request $request)
-{
-    // 1. Lấy dữ liệu từ Form gửi lên
-    $hoTen = $request->input('ho_ten');
-    $sdt = $request->input('so_dien_thoai');
-    $diaChi = $request->input('dia_chi');
-    
-    // 2. Tạm thời mình chưa làm bảng Database đơn hàng, 
-    // nên mình sẽ xóa giỏ hàng và báo thành công để test giao diện trước.
-    
-    session()->forget('gio_hang'); // Xóa giỏ hàng sau khi đặt
+    {
+        $hoTen = $request->input('ho_ten');
+        session()->forget('gio_hang'); 
 
-    // 3. Hiển thị thông báo bằng SweetAlert2 hoặc thông báo thường
-    return redirect('/')->with('swal_success', 'Cảm ơn ' . $hoTen . '! Đơn hàng đã được hệ thống ghi nhận.');
-}
-}
+        // Đổi thành order_success cho khớp với đoạn script SweetAlert ở trang welcome
+        return redirect('/')->with('order_success', 'Cảm ơn ' . $hoTen . '! Đơn hàng đã được ghi nhận.');
+    }
 
+    /**
+     * 7. Hiển thị chi tiết truyện
+     */
+    public function show($id)
+    {
+        $story = \App\Models\Truyen::findOrFail($id);
+        return view('stories.show', compact('story'));
+    }
+
+    /**
+     * 8. Lọc theo thể loại
+     */
+    public function theLoai($slug)
+    {
+        $category = \DB::table('categories')->where('name', $slug)->first();
+
+        if ($category) {
+            // Đã sửa Story thành Truyen ở đây để không bị lỗi
+            $stories = \App\Models\Truyen::where('category_id', $category->id)->get();
+        } else {
+            $stories = collect(); 
+        }
+
+        return view('welcome', compact('stories', 'slug'));
+    }
+}
