@@ -45,4 +45,32 @@ class GioHangController extends Controller
         // Gửi thông báo ngắn gọn để tránh lỗi văng dấu nháy làm hỏng Script
         return redirect()->back()->with('swal_success', 'Đã thêm truyện vào giỏ hàng thành công!');
     }
+    // Hàm hiển thị trang Checkout
+    public function thanhToan()
+    {
+        $gioHang = session()->get('gio_hang', []);
+        
+        // Nếu giỏ hàng trống mà cố tình vào trang thanh toán thì đuổi về trang chủ
+        if(empty($gioHang)) {
+            return redirect('/')->with('error', 'Giỏ hàng của bạn đang trống!');
+        }
+
+        return view('giohang.checkout', compact('gioHang'));
+    }
+    public function xuLyThanhToan(Request $request)
+{
+    // 1. Lấy dữ liệu từ Form gửi lên
+    $hoTen = $request->input('ho_ten');
+    $sdt = $request->input('so_dien_thoai');
+    $diaChi = $request->input('dia_chi');
+    
+    // 2. Tạm thời mình chưa làm bảng Database đơn hàng, 
+    // nên mình sẽ xóa giỏ hàng và báo thành công để test giao diện trước.
+    
+    session()->forget('gio_hang'); // Xóa giỏ hàng sau khi đặt
+
+    // 3. Hiển thị thông báo bằng SweetAlert2 hoặc thông báo thường
+    return redirect('/')->with('swal_success', 'Cảm ơn ' . $hoTen . '! Đơn hàng đã được hệ thống ghi nhận.');
 }
+}
+

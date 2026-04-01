@@ -10,6 +10,38 @@
         .cart-container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
         .img-cart { width: 80px; height: 110px; object-fit: cover; border-radius: 5px; }
         .total-price { font-size: 24px; color: #e44d26; font-weight: bold; }
+        .btn-checkout {
+            padding: 12px 30px; 
+            background: linear-gradient(135deg, #ff7e5f, #e44d26); 
+            color: white; 
+            text-decoration: none; 
+            border-radius: 8px; 
+            font-weight: bold; 
+            transition: 0.3s; 
+            box-shadow: 0 4px 10px rgba(228, 77, 38, 0.3); 
+            font-size: 1.1rem;
+            display: inline-block;
+        }
+        .btn-checkout:hover {
+            color: white;
+            transform: scale(1.05);
+            text-decoration: none;
+        }
+        .btn-back {
+            padding: 12px 20px; 
+            background-color: #2c3e50; 
+            color: white; 
+            text-decoration: none; 
+            border-radius: 8px; 
+            font-weight: bold; 
+            transition: 0.3s;
+            display: inline-block;
+        }
+        .btn-back:hover {
+            background-color: #1a252f;
+            color: white;
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
@@ -46,27 +78,31 @@
                                 <td class="align-middle">{{ $details['so_luong'] }}</td>
                                 
                                 {{-- Ép kiểu hiển thị Thành tiền --}}
-                                <td class="align-middle">{{ number_format((float)$details['gia_ban'] * $details['so_luong'], 0, ',', '.') }} đ</td>
+                                <td class="align-middle text-danger font-weight-bold">{{ number_format((float)$details['gia_ban'] * $details['so_luong'], 0, ',', '.') }} đ</td>
                             </tr>
                         @endforeach
                     @else
                         <tr>
-                            <td colspan="5" class="text-center">Giỏ hàng đang trống!</td>
+                            <td colspan="5" class="text-center py-4">Giỏ hàng của bạn đang trống! Hãy quay lại chọn truyện nhé.</td>
                         </tr>
                     @endif
                 </tbody>
             </table>
-    <div style="margin-top: 30px; display: flex; justify-content: space-between;">
-         <a ><a href="{{ url('/') }}" style="padding: 12px 20px; background-color: #2c3e50; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; transition: 0.3s;">
-        ⬅ Tiếp tục chọn truyện
-</a>
-     </div>
-            <div class="text-right mt-4">
-                {{-- Tổng tiền cũng được fomat lại cho đẹp --}}
-                <h4>Tổng thanh toán: <span class="total-price">{{ number_format($total, 0, ',', '.') }} VNĐ</span></h4>
-                <a href="{{ url('/') }}" class="btn btn-secondary mt-2">Tiếp tục mua truyện</a>
-                <button class="btn btn-danger mt-2">Thanh toán ngay</button>
+
+            {{-- Phần tổng tiền và các nút điều hướng được gom lại cho gọn --}}
+            <div class="d-flex justify-content-between align-items-end mt-4 pt-3 border-top">
+                <a href="{{ url('/') }}" class="btn-back">⬅ Tiếp tục chọn truyện</a>
+                
+                <div class="text-right">
+                    <h4 class="mb-3">Tổng thanh toán: <span class="total-price">{{ number_format($total, 0, ',', '.') }} VNĐ</span></h4>
+                    
+                    {{-- Nút Thanh Toán đã được gắn route sang trang checkout --}}
+                    @if(session('gio_hang') && count(session('gio_hang')) > 0)
+                        <a href="{{ route('cart.checkout') }}" class="btn-checkout">Thanh toán ngay ➡</a>
+                    @endif
+                </div>
             </div>
+
         </div>
     </div>
 </body>
