@@ -24,17 +24,31 @@
             </div>
 
             <ul class="nav-links">
-                <li><a href="/" class="nav-btn btn-home"><i class="fas fa-home"></i> Trang Chủ</a></li>
-                <li><button onclick="openFilter()" class="nav-btn btn-cate"><i class="fas fa-filter"></i> Thể Loại</button></li>
-                <li>
-                    <a href="{{ route('cart.index') }}" class="cart-icon">
-                        <i class="fas fa-shopping-cart"></i>
-                        @if(session('gio_hang'))
-                            <span class="badge">{{ count(session('gio_hang')) }}</span>
-                        @endif
-                    </a>
-                </li>
-            </ul>
+    <li><a href="{{ route('home') }}" class="nav-btn btn-home"><i class="fas fa-home"></i> Trang Chủ</a></li>
+    <li><button onclick="openFilter()" class="nav-btn btn-cate"><i class="fas fa-filter"></i> Thể Loại</button></li>
+    
+    @auth
+        <li><span style="color: white;">Chào, {{ Auth::user()->name }}</span></li>
+        <li>
+            <form action="{{ route('logout') }}" method="POST" style="display:inline;">
+                @csrf
+                <button type="submit" class="nav-btn" style="background:none; border:none; color:white; cursor:pointer;">Đăng xuất</button>
+            </form>
+        </li>
+    @else
+        <li><a href="{{ route('login') }}" class="nav-btn"><i class="fas fa-user"></i> Đăng nhập</a></li>
+        <li><a href="{{ route('register') }}" class="nav-btn"><i class="fas fa-user-plus"></i> Đăng ký</a></li>
+    @endauth
+
+    <li>
+        <a href="{{ route('cart.index') }}" class="cart-icon">
+            <i class="fas fa-shopping-cart"></i>
+            @if(session('gio_hang'))
+                <span class="badge">{{ count(session('gio_hang')) }}</span>
+            @endif
+        </a>
+    </li>
+</ul>
         </nav>
     </header>
 
