@@ -1,9 +1,9 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\AuthController; // Phải có dòng này để nhận AuthController bạn đã tạo
-use App\Models\Story; // Phải có dòng này để lấy dữ liệu truyện
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\GioHangController; // Code của bạn
+use App\Http\Controllers\AuthController;    // Code của bạn bạn
+use App\Http\Controllers\ProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -11,34 +11,50 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-// 1. TRANG CHỦ: Lấy dữ liệu truyện và đặt tên route là 'home'
-Route::get('/', function () {
-    $stories = Story::all(); // Lấy tất cả truyện từ database
-    return view('welcome', compact('stories'));
-})->name('home');
+// ==========================================
+// PHẦN 1: TÍNH NĂNG CHÍNH (DO BẠN VIẾT)
+// ==========================================
+
+// 1. TRANG CHỦ (Hiển thị danh sách truyện)
+Route::get('/', [GioHangController::class, 'index'])->name('home');
+
+// 2. TÌM KIẾM TRUYỆN
+Route::get('/search', [GioHangController::class, 'search'])->name('search');
+
+// 3. XEM CHI TIẾT TRUYỆN (Trang chọn tập/chap)
+Route::get('/truyen/{id}', [GioHangController::class, 'show'])->name('story.show');
+
+// 4. GIỎ HÀNG
+Route::get('/gio-hang', [GioHangController::class, 'xemGioHang'])->name('cart.index');
+Route::post('/mua-hang/{id}', [GioHangController::class, 'themVaoGio'])->name('cart.add');
+Route::get('/xoa-khoi-gio/{id}', [GioHangController::class, 'xoaKhoiGio'])->name('cart.remove');
+Route::get('/reset-gio-hang', function() {
+    session()->forget('gio_hang');
+    return redirect()->route('home')->with('swal_success', 'Đã dọn dẹp giỏ hàng!');
+});
+
+// 5. THANH TOÁN
+Route::get('/thanh-toan', [GioHangController::class, 'thanhToan'])->name('cart.checkout');
+Route::post('/xu-ly-thanh-toan', [GioHangController::class, 'xuLyThanhToan'])->name('cart.process');
+
+// 6. LỌC THEO THỂ LOẠI
+Route::get('/the-loai/{slug}', [GioHangController::class, 'theLoai'])->name('category.show');
+
+
+// ==========================================
+// PHẦN 2: TÍNH NĂNG ĐĂNG NHẬP (CỦA BẠN BẠN VIẾT)
+// ==========================================
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 Route::post('/register', [AuthController::class, 'register']);
-// 2. CÁC ROUTE PHỤ TRỢ: Để file welcome.blade.php không bị lỗi "Route not defined"
-Route::get('/search', function() { 
-    return "Trang tìm kiếm đang xây dựng"; 
-})->name('search');
 
-Route::get('/cart', function() { 
-    return "Trang giỏ hàng đang xây dựng"; 
-})->name('cart.index');
-
-Route::get('/story/{id}', function($id) { 
-    return "Chi tiết truyện số: " . $id; 
-})->name('story.show');
-
-
-// 3. LOGIC ĐĂNG NHẬP (CỦA BẠN TỰ VIẾT)
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 
-// 4. CÁC ROUTE CỦA LARAVEL BREEZE (GIỮ LẠI NẾU MUỐN DÙNG TRANG DASHBOARD)
+// ==========================================
+// PHẦN 3: BREEZE ĐỂ DỰ PHÒNG (NẾU CẦN)
+// ==========================================
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
@@ -48,5 +64,3 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
-
-// require __DIR__.'/auth.php'; // Tạm thời đóng dòng này lại để không bị xung đột với AuthController bạn tự viết
